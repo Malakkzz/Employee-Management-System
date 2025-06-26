@@ -4,9 +4,9 @@ import { getDB } from "~/db/getDB";
 import { useCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
 import {
   createViewDay,
-  createViewMonthAgenda,
-  createViewMonthGrid,
   createViewWeek,
+  createViewMonthGrid,
+  createViewMonthAgenda,
 } from "@schedule-x/calendar";
 import { createEventsServicePlugin } from "@schedule-x/events-service";
 import "@schedule-x/theme-default/dist/index.css";
@@ -26,6 +26,7 @@ export async function loader() {
 export default function TimesheetsPage() {
   const { timesheets } = useLoaderData();
   const [view, setView] = useState<"table" | "calendar">("table");
+  const [searchQuery, setSearchQuery] = useState<string>("");  // New state for search query
   const navigate = useNavigate();
 
   // events service plugin
@@ -43,49 +44,63 @@ export default function TimesheetsPage() {
   });
 
   const formatToScheduleX = (datetime: string) => {
-  if (!datetime || typeof datetime !== 'string') {
-    return ''; // If datetime is invalid, return an empty string
-  }
-
-  const [date, time] = datetime.trim().split(' ');
-
-  // If time is missing, or the time is empty, return empty string
-  if (!time || time.length !== 5) {
-    return ''; 
-  }
-
-  const normalizedTime = time.length === 5 ? time + ':00' : time;
-  return `${date} ${normalizedTime}`; // Return the full format: YYYY-MM-DD HH:mm:ss
-}
-
-
-  useEffect(() => {
-  const events = timesheets.map((ts: any) => {
-    const start = formatToScheduleX(ts.start_time);
-    const end = formatToScheduleX(ts.end_time);
-    
-    // Only include valid events (non-empty start and end)
-    if (!start || !end) {
-      return null; // Skip invalid events
+    if (!datetime || typeof datetime !== 'string') {
+      return ''; // If datetime is invalid, return an empty string
     }
 
-    return {
-      id: ts.id.toString(),
-      title: ts.full_name,
-      start,
-      end,
-    };
-  }).filter(Boolean); // Remove any null events
+    const [date, time] = datetime.trim().split(' ');
 
-  console.log('Valid events:', events);
-  eventsService.set(events);
-}, [timesheets, eventsService]);
+    // If time is missing, or the time is empty, return empty string
+    if (!time || time.length !== 5) {
+      return ''; 
+    }
 
+    const normalizedTime = time.length === 5 ? time + ':00' : time;
+    return `${date} ${normalizedTime}`; // Return the full format: YYYY-MM-DD HH:mm:ss
+  };
 
+  useEffect(() => {
+    const events = timesheets.map((ts: any) => {
+      const start = formatToScheduleX(ts.start_time);
+      const end = formatToScheduleX(ts.end_time);
+      
+      // Only include valid events (non-empty start and end)
+      if (!start || !end) {
+        return null; // Skip invalid events
+      }
+
+      return {
+        id: ts.id.toString(),
+        title: ts.full_name,
+        start,
+        end,
+      };
+    }).filter(Boolean); // Remove any null events
+
+    console.log('Valid events:', events);
+    eventsService.set(events);
+  }, [timesheets, eventsService]);
+
+  // Filter timesheets based on the search query
+  const filteredTimesheets = timesheets.filter((ts: any) => 
+    ts.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Timesheets</h1>
+      
+      {/* Search Bar */}
+      <div>
+        <input
+          type="text"
+          placeholder="Search by employee"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}  // Update search query
+          style={{ padding: "8px", marginBottom: "1rem" }}
+        />
+      </div>
+
       <ul style={{ marginTop: "2rem" }}>
         <li>
           <Link to="/timesheets/new">New Timesheet</Link>
@@ -115,7 +130,7 @@ export default function TimesheetsPage() {
             </tr>
           </thead>
           <tbody>
-            {timesheets.map((ts: any) => (
+            {filteredTimesheets.map((ts: any) => (
               <tr
                 key={ts.id}
                 onClick={() => navigate(`/timesheets/${ts.id}`)}
