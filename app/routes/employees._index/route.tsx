@@ -85,7 +85,7 @@ export default function EmployeesPage() {
         cellSpacing={0}
         style={{ width: "100%" }}
       >
-        <thead>
+        <thead style={{ backgroundColor: "#f2f2f2" }}>
           <tr>
             <th>ID</th>
             <th>Full Name</th>

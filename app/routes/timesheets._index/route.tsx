@@ -1,52 +1,89 @@
-import { useLoaderData } from "react-router";
+import { useLoaderData, Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { getDB } from "~/db/getDB";
 
 export async function loader() {
   const db = await getDB();
-  const timesheetsAndEmployees = await db.all(
-    "SELECT timesheets.*, employees.full_name, employees.id AS employee_id FROM timesheets JOIN employees ON timesheets.employee_id = employees.id"
-  );
-
-  return { timesheetsAndEmployees };
+  const timesheets = await db.all(`
+    SELECT timesheets.*, employees.full_name
+    FROM timesheets
+    JOIN employees ON timesheets.employee_id = employees.id
+  `);
+  return { timesheets };
 }
 
 export default function TimesheetsPage() {
-  const { timesheetsAndEmployees } = useLoaderData();
+  const { timesheets } = useLoaderData();
+  const [view, setView] = useState<"table" | "calendar">("table");
+  const navigate = useNavigate();
 
   return (
-    <div>
-      <div>
-        <button>Table View</button>
-        <button>Calendar View</button>
+    <div style={{ padding: "2rem" }}>
+      <h1>Timesheets</h1>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <button onClick={() => setView("table")}>📋 Table View</button>
+        <button onClick={() => setView("calendar")}>📆 Calendar View</button>
       </div>
-      {/* Replace `true` by a variable that is changed when the view buttons are clicked */}
-      {true ? (
-        <div>
-          {timesheetsAndEmployees.map((timesheet: any) => (
-            <div key={timesheet.id}>
-              <ul>
-                <li>Timesheet #{timesheet.id}</li>
-                <ul>
-                  <li>Employee: {timesheet.full_name} (ID: {timesheet.employee_id})</li>
-                  <li>Start Time: {timesheet.start_time}</li>
-                  <li>End Time: {timesheet.end_time}</li>
-                </ul>
-              </ul>
-            </div>
-          ))}
-        </div>
+
+      {view === "table" ? (
+        <table
+          border={1}
+          cellPadding={10}
+          style={{ width: "100%", borderCollapse: "collapse" }}
+        >
+          <thead style={{ backgroundColor: "#f2f2f2" }}>
+            <tr>
+              <th>Timesheet #</th>
+              <th>Employee</th>
+              <th>Start</th>
+              <th>End</th>
+            </tr>
+          </thead>
+          <tbody>
+            {timesheets.map((ts: any) => (
+              <tr
+                key={ts.id}
+                onClick={() => navigate(`/timesheets/${ts.id}`)}
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: "#fff",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#f5f5f5")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#fff")
+                }
+              >
+                <td>{ts.id}</td>
+                <td>{ts.full_name}</td>
+                <td>{ts.start_time}</td>
+                <td>{ts.end_time}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       ) : (
         <div>
-          <p>
-            To implement, see <a href="https://schedule-x.dev/docs/frameworks/react">Schedule X React documentation</a>.
-          </p>
+          <p>📅 Calendar view to be implemented using Schedule-X</p>
+          <a
+            href="https://schedule-x.dev/docs/frameworks/react"
+            target="_blank"
+            rel="noreferrer"
+          >
+            View Schedule-X docs
+          </a>
         </div>
       )}
-      <hr />
+
       <ul>
-        <li><a href="/timesheets/new">New Timesheet</a></li>
-        <li><a href="/employees">Employees</a></li>
+        <li>
+          <Link to="/timesheets/new">New Timesheet</Link>
+        </li>
+        <li>
+          <Link to="/employees">Employees</Link>
+        </li>
       </ul>
     </div>
   );
