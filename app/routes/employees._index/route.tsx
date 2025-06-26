@@ -1,52 +1,83 @@
 //useLoaderData(): Used to access data returned from the loader on this route.
-//useSearchParams: Used to read/update URL query parameters.
-import { useLoaderData, Link, Form, useSearchParams } from "react-router";
-import { getDB } from "~/db/getDB"; //Custom helper to access the SQLite database.
+import { useLoaderData, Link, useNavigate } from "react-router";
+import { getDB } from "~/db/getDB"; //custom helper to access the SQLite database.
 import type { LoaderFunctionArgs } from "react-router"; //LoaderFunctionArgs: A type that defines what the loader function receives (like request, params, etc..)
+import { useState, useMemo } from "react";
 
 //this function to fetch employee data from database
 export async function loader({ request }: LoaderFunctionArgs) {
   const db = await getDB();
 
-  const url = new URL(request.url);
-  const search = url.searchParams.get("search")?.toLowerCase() || "";
-
   //query to fetch all employees
   const employees = await db.all("SELECT * FROM employees");
 
-  const filteredEmployees = employees.filter((e) =>
-    e.full_name.toLowerCase().includes(search)
-  );
+  //xtraction of unique department names for the dropdown
+  const departments = [
+    ...new Set(employees.map((e) => e.department).filter(Boolean)),
+  ];
 
-  //Returns filtered employees and the search value to the component.
-  return { employees: filteredEmployees, search };
+  //returns both employees and departments to the component
+  return {
+    employees,
+    departments,
+  };
 }
 
 export default function EmployeesPage() {
-  const { employees, search } = useLoaderData();
-  const [searchParams] = useSearchParams();
+  const { employees, departments } = useLoaderData(); //get employees and departments from the loader
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const navigate = useNavigate();
+
+
+  //function to filter employees every time search term or department changes
+  //used useMemo to optimize performance by recalculating only when dependencies change
+  const filteredEmployees = useMemo(() => {
+    return employees.filter((e: any) => {
+      const nameMatch = e.full_name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const deptMatch = selectedDepartment
+        ? e.department === selectedDepartment
+        : true;
+      return nameMatch && deptMatch;
+    });
+  }, [employees, searchTerm, selectedDepartment]);
 
   return (
     <div style={{ padding: "1rem" }}>
       <h1>Employees</h1>
 
+      {/* navigation */}
       <nav style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
         <Link to="/employees/new">➕ New Employee</Link>
         <Link to="/timesheets">📅 Timesheets</Link>
       </nav>
 
-      {/* Bonus Search Bar */}
-      <Form method="get" style={{ marginBottom: "1rem" }}>
+      {/* live search + department filter */}
+      {/* didn't use forms or submissions, just react state */}
+      <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
         <input
           type="text"
-          name="search"
           placeholder="Search by name..."
-          defaultValue={search}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)} //updates state immediately
         />
-        <button type="submit">Search</button>
-      </Form>
 
-      {/* Employees Table */}
+        <select
+          value={selectedDepartment}
+          onChange={(e) => setSelectedDepartment(e.target.value)}
+        >
+          <option value="">All Departments</option>
+          {departments.map((dept: string) => (
+            <option key={dept} value={dept}>
+              {dept}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* employee table */}
       <table
         border={1}
         cellPadding={8}
@@ -59,24 +90,35 @@ export default function EmployeesPage() {
             <th>Full Name</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Job Title</th>
+            <th>Department</th>
           </tr>
         </thead>
         <tbody>
-          {employees.map((employee: any) => (
-            <tr key={employee.id}>
-              <td>
-                <Link to={`/employees/${employee.id}`}>{employee.id}</Link>
-              </td>
-              <td>{employee.full_name}</td>
-              <td>{employee.email || "-"}</td>
-              <td>{employee.phone || "-"}</td>
-              <td>{employee.job_title || "-"}</td>
+          {filteredEmployees.map((e: any) => (
+            //this allows the whole row to be clickable with a little styling 
+            <tr
+              key={e.id}
+              onClick={() => navigate(`/employees/${e.id}`)}
+              style={{
+                cursor: "pointer",
+                backgroundColor: "#fff",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#f5f5f5")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#fff")
+              }
+            >
+              <td>{e.id}</td>
+              <td>{e.full_name}</td>
+              <td>{e.email || "-"}</td>
+              <td>{e.phone || "-"}</td>
+              <td>{e.department || "-"}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <hr />
     </div>
   );
 }
