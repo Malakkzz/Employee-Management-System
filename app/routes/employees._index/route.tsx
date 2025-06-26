@@ -53,6 +53,7 @@ export default function EmployeesPage() {
         <Link to="/employees/new">➕ New Employee</Link>
         <Link to="/timesheets">📅 Timesheets</Link>
       </nav>
+      <h3>Click on an employee to edit it!</h3>
 
       {/* live search + department filter */}
       {/* didn't use forms or submissions, just react state */}

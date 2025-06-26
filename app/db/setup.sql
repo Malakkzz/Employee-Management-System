@@ -18,17 +18,17 @@ DROP TABLE IF EXISTS timesheets;
 -- Create employees table
 CREATE TABLE employees (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  full_name TEXT NULL,
+  full_name TEXT NOT NULL,
   email TEXT NOT NULL,
-  phone TEXT NOT NULL,
-  dob TEXT NOT NULL, -- date of birth
-  job_title TEXT NOT NULL,
-  department TEXT NOT NULL,
-  salary REAL NOT NULL,
-  start_date TEXT NOT NULL,
-  end_date TEXT, -- nullable
-  photo TEXT, -- path to uploaded photo
-  documents TEXT -- JSON string with paths to uploaded docs
+  phone TEXT,
+  date_of_birth TEXT,
+  department TEXT,
+  job_title TEXT,
+  salary REAL,
+  start_date TEXT,
+  end_date TEXT,
+  photo_path TEXT,
+  cv_path TEXT
 );
 
 -- Create timesheets table
