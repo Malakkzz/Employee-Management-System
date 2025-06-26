@@ -1,7 +1,17 @@
 import { useLoaderData, Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getDB } from "~/db/getDB";
+import { useCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
+import {
+  createViewDay,
+  createViewMonthAgenda,
+  createViewMonthGrid,
+  createViewWeek,
+} from "@schedule-x/calendar";
+import { createEventsServicePlugin } from "@schedule-x/events-service";
+import "@schedule-x/theme-default/dist/index.css";
 
+// ----- loader ----------------------------------------------------------
 export async function loader() {
   const db = await getDB();
   const timesheets = await db.all(`
@@ -12,14 +22,49 @@ export async function loader() {
   return { timesheets };
 }
 
+// ----- page ------------------------------------------------------------
 export default function TimesheetsPage() {
   const { timesheets } = useLoaderData();
   const [view, setView] = useState<"table" | "calendar">("table");
   const navigate = useNavigate();
 
+  // events service plugin
+  const eventsService = useState(() => createEventsServicePlugin())[0];
+
+  // calendar instance
+  const calendarApp = useCalendarApp({
+    views: [
+      createViewDay(),
+      createViewWeek(),
+      createViewMonthGrid(),
+      createViewMonthAgenda(),
+    ],
+    plugins: [eventsService],
+  });
+
+  useEffect(() => {
+    const events = timesheets.map((ts: any) => ({
+      id: ts.id.toString(),
+      title: ts.full_name,
+      start: ts.start_time.slice(0, 16), // YYYY-MM-DD HH:mm
+      end: ts.end_time.slice(0, 16),
+    }));
+
+    console.log("Sending to Schedule-X:", events);
+    eventsService.set(events);
+  }, [timesheets, eventsService]);
+
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Timesheets</h1>
+      <ul style={{ marginTop: "2rem" }}>
+        <li>
+          <Link to="/timesheets/new">New Timesheet</Link>
+        </li>
+        <li>
+          <Link to="/employees">Employees</Link>
+        </li>
+      </ul>
 
       <div style={{ marginBottom: "1rem" }}>
         <button onClick={() => setView("table")}>📋 Table View</button>
@@ -45,10 +90,7 @@ export default function TimesheetsPage() {
               <tr
                 key={ts.id}
                 onClick={() => navigate(`/timesheets/${ts.id}`)}
-                style={{
-                  cursor: "pointer",
-                  backgroundColor: "#fff",
-                }}
+                style={{ cursor: "pointer", backgroundColor: "#fff" }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.backgroundColor = "#f5f5f5")
                 }
@@ -65,26 +107,10 @@ export default function TimesheetsPage() {
           </tbody>
         </table>
       ) : (
-        <div>
-          <p>📅 Calendar view to be implemented using Schedule-X</p>
-          <a
-            href="https://schedule-x.dev/docs/frameworks/react"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View Schedule-X docs
-          </a>
+        <div className="sx-react-calendar-wrapper" style={{ height: "700px" }}>
+          <ScheduleXCalendar calendarApp={calendarApp} />
         </div>
       )}
-
-      <ul>
-        <li>
-          <Link to="/timesheets/new">New Timesheet</Link>
-        </li>
-        <li>
-          <Link to="/employees">Employees</Link>
-        </li>
-      </ul>
     </div>
   );
 }
