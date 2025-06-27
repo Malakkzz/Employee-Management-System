@@ -10,8 +10,6 @@ import {
 } from "@schedule-x/calendar";
 import { createEventsServicePlugin } from "@schedule-x/events-service";
 import "@schedule-x/theme-default/dist/index.css";
-
-// ----- loader ----------------------------------------------------------
 export async function loader() {
   const db = await getDB();
   const timesheets = await db.all(`
@@ -22,7 +20,6 @@ export async function loader() {
   return { timesheets };
 }
 
-// ----- page ------------------------------------------------------------
 export default function TimesheetsPage() {
   const { timesheets } = useLoaderData();
   const [view, setView] = useState<"table" | "calendar">("table");
