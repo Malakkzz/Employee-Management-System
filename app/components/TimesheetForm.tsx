@@ -6,7 +6,11 @@ interface TimesheetFormProps {
   submitButtonText: string;
 }
 
-export default function TimesheetForm({ employees, timesheet, submitButtonText }: TimesheetFormProps) {
+export default function TimesheetForm({
+  employees,
+  timesheet,
+  submitButtonText,
+}: TimesheetFormProps) {
   return (
     <Form method="post">
       <div>
@@ -29,7 +33,7 @@ export default function TimesheetForm({ employees, timesheet, submitButtonText }
           type="datetime-local"
           name="start_time"
           id="start_time"
-          defaultValue={timesheet?.start_time || ''}
+          defaultValue={timesheet?.start_time || ""}
           required
         />
       </div>
@@ -39,10 +43,21 @@ export default function TimesheetForm({ employees, timesheet, submitButtonText }
           type="datetime-local"
           name="end_time"
           id="end_time"
-          defaultValue={timesheet?.end_time || ''}
+          defaultValue={timesheet?.end_time || ""}
           required
         />
       </div>
+      <div>
+        <label htmlFor="summary">Summary</label>
+        <textarea
+          name="summary"
+          id="summary"
+          rows={3}
+          defaultValue={timesheet?.summary || ""}
+          placeholder="Enter a short summary..."
+        />
+      </div>
+
       <button type="submit">{submitButtonText}</button>
     </Form>
   );

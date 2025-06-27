@@ -12,7 +12,7 @@ export async function loader() {
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const employee_id = formData.get("employee_id");
-  
+  const summary = formData.get("summary")?.toString();
 
   // to control the format of the date when added:
   const formatDatetime = (value: string | null): string | null => {
@@ -30,13 +30,16 @@ export const action: ActionFunction = async ({ request }) => {
     end_time_raw ? end_time_raw.toString() : null
   );
 
+  if (start_time && end_time && new Date(start_time) >= new Date(end_time)) {
+    return new Response("Start time must be before end time", { status: 400 });
+  }
 
   const db = await getDB();
 
   // Create a new timesheet
   await db.run(
-    "INSERT INTO timesheets (employee_id, start_time, end_time) VALUES (?, ?, ?)",
-    [employee_id, start_time, end_time]
+    "INSERT INTO timesheets (employee_id, start_time, end_time, summary) VALUES (?, ?, ?, ?)",
+    [employee_id, start_time, end_time, summary]
   );
 
   return redirect("/timesheets");

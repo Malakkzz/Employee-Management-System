@@ -23,7 +23,7 @@ export async function loader() {
 export default function TimesheetsPage() {
   const { timesheets } = useLoaderData();
   const [view, setView] = useState<"table" | "calendar">("table");
-  const [searchQuery, setSearchQuery] = useState<string>("");  // New state for search query
+  const [searchQuery, setSearchQuery] = useState<string>(""); // New state for search query
   const navigate = useNavigate();
 
   // events service plugin
@@ -41,59 +41,61 @@ export default function TimesheetsPage() {
   });
 
   const formatToScheduleX = (datetime: string) => {
-    if (!datetime || typeof datetime !== 'string') {
-      return ''; // If datetime is invalid, return an empty string
+    if (!datetime || typeof datetime !== "string") {
+      return ""; // If datetime is invalid, return an empty string
     }
 
-    const [date, time] = datetime.trim().split(' ');
+    const [date, time] = datetime.trim().split(" ");
 
     // If time is missing, or the time is empty, return empty string
     if (!time || time.length !== 5) {
-      return ''; 
+      return "";
     }
 
-    const normalizedTime = time.length === 5 ? time + ':00' : time;
+    const normalizedTime = time.length === 5 ? time + ":00" : time;
     return `${date} ${normalizedTime}`; // Return the full format: YYYY-MM-DD HH:mm:ss
   };
 
   useEffect(() => {
-    const events = timesheets.map((ts: any) => {
-      const start = formatToScheduleX(ts.start_time);
-      const end = formatToScheduleX(ts.end_time);
-      
-      // Only include valid events (non-empty start and end)
-      if (!start || !end) {
-        return null; // Skip invalid events
-      }
+    const events = timesheets
+      .map((ts: any) => {
+        const start = formatToScheduleX(ts.start_time);
+        const end = formatToScheduleX(ts.end_time);
 
-      return {
-        id: ts.id.toString(),
-        title: ts.full_name,
-        start,
-        end,
-      };
-    }).filter(Boolean); // Remove any null events
+        // Only include valid events (non-empty start and end)
+        if (!start || !end) {
+          return null; // Skip invalid events
+        }
 
-    console.log('Valid events:', events);
+        return {
+          id: ts.id.toString(),
+          title: ts.full_name,
+          start,
+          end,
+        };
+      })
+      .filter(Boolean); // Remove any null events
+
+    console.log("Valid events:", events);
     eventsService.set(events);
   }, [timesheets, eventsService]);
 
   // Filter timesheets based on the search query
-  const filteredTimesheets = timesheets.filter((ts: any) => 
+  const filteredTimesheets = timesheets.filter((ts: any) =>
     ts.full_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Timesheets</h1>
-      
+
       {/* Search Bar */}
       <div>
         <input
           type="text"
           placeholder="Search by employee"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}  // Update search query
+          onChange={(e) => setSearchQuery(e.target.value)} // Update search query
           style={{ padding: "8px", marginBottom: "1rem" }}
         />
       </div>
@@ -124,6 +126,7 @@ export default function TimesheetsPage() {
               <th>Employee</th>
               <th>Start</th>
               <th>End</th>
+              <th>Summary</th>
             </tr>
           </thead>
           <tbody>
@@ -143,6 +146,7 @@ export default function TimesheetsPage() {
                 <td>{ts.full_name}</td>
                 <td>{ts.start_time}</td>
                 <td>{ts.end_time}</td>
+                <td>{ts.summary}</td>
               </tr>
             ))}
           </tbody>
