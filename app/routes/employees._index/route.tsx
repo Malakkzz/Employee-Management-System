@@ -45,31 +45,33 @@ export default function EmployeesPage() {
   }, [employees, searchTerm, selectedDepartment]);
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1>Employees</h1>
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Employees</h1>
 
       {/* navigation */}
-      <nav style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
+      <nav className="flex gap-6 mb-6 text-blue-600 font-medium underline">
         <Link to="/employees/new">➕ New Employee</Link>
         <Link to="/timesheets">📅 Timesheets</Link>
       </nav>
-      <h3>Click on an employee to edit it!</h3>
+      <h3 className="text-lg font-medium mb-4">Click on an employee to edit it!</h3>
 
       {/* live search + department filter */}
       {/* didn't use forms or submissions, just react state */}
-      <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
+       <div className="flex gap-4 mb-6">
         <input
           type="text"
           placeholder="Search by name..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)} //updates state immediately
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
         />
 
         <select
           value={selectedDepartment}
           onChange={(e) => setSelectedDepartment(e.target.value)}
+          className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
         >
-          <option value="">All Departments</option>
+<option value="">All Departments</option>
           {departments.map((dept: string) => (
             <option key={dept} value={dept}>
               {dept}
@@ -79,47 +81,35 @@ export default function EmployeesPage() {
       </div>
 
       {/* employee table */}
-      <table
-        border={1}
-        cellPadding={8}
-        cellSpacing={0}
-        style={{ width: "100%" }}
-      >
-        <thead style={{ backgroundColor: "#f2f2f2" }}>
-          <tr>
-            <th>ID</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Department</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200 rounded-md shadow text-sm">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="p-3 text-left border-b">ID</th>
+              <th className="p-3 text-left border-b">Full Name</th>
+              <th className="p-3 text-left border-b">Email</th>
+              <th className="p-3 text-left border-b">Phone</th>
+              <th className="p-3 text-left border-b">Department</th>
+            </tr>
+          </thead>
+          <tbody>
           {filteredEmployees.map((e: any) => (
             //this allows the whole row to be clickable with a little styling 
             <tr
               key={e.id}
               onClick={() => navigate(`/employees/${e.id}`)}
-              style={{
-                cursor: "pointer",
-                backgroundColor: "#fff",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#f5f5f5")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#fff")
-              }
+              className="hover:bg-gray-50 cursor-pointer"
             >
-              <td>{e.id}</td>
-              <td>{e.full_name}</td>
-              <td>{e.email || "-"}</td>
-              <td>{e.phone || "-"}</td>
-              <td>{e.department || "-"}</td>
+              <td className="p-3 border-b">{e.id}</td>
+                <td className="p-3 border-b">{e.full_name}</td>
+                <td className="p-3 border-b">{e.email || "-"}</td>
+                <td className="p-3 border-b">{e.phone || "-"}</td>
+                <td className="p-3 border-b">{e.department || "-"}</td>
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

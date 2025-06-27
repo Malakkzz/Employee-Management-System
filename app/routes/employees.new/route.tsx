@@ -95,21 +95,13 @@ export default function NewEmployeePage() {
   const actionData = useActionData();
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Create New Employee</h1>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Create New Employee</h1>
 
       {actionData?.errors?.length > 0 && (
-        <div
-          style={{
-            backgroundColor: "#ffe0e0",
-            border: "1px solid red",
-            padding: "1rem",
-            marginBottom: "1rem",
-            color: "darkred",
-          }}
-        >
-          <strong>Please fix the following:</strong>
-          <ul>
+        <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded mb-6">
+          <strong className="block font-medium mb-2">Please fix the following:</strong>
+          <ul className="list-disc list-inside space-y-1">
             {actionData.errors.map((err: string, i: number) => (
               <li key={i}>{err}</li>
             ))}
@@ -119,8 +111,10 @@ export default function NewEmployeePage() {
 
       <EmployeeForm />
 
-      <hr />
-      <Link to="/employees">← Back to Employee List</Link>
+      <hr className="my-8" />
+      <Link to="/employees" className="text-blue-600 hover:underline">
+        ← Back to Employee List
+      </Link>
     </div>
   );
 }

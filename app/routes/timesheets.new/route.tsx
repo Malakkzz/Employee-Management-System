@@ -49,20 +49,20 @@ export default function TimesheetFormPage() {
   const { employees, timesheet } = useLoaderData();
 
   return (
-    <div>
-      <h1>Create New Timesheet</h1>
+    <div className="max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-semibold mb-6">Create New Timesheet</h1>
       <TimesheetForm
         employees={employees}
         timesheet={null} // No timesheet for new creation
         submitButtonText="Create Timesheet"
       />
-      <hr />
-      <ul>
+      <hr className="my-8" />
+      <ul className="flex space-x-6 text-blue-600 underline">
         <li>
-          <a href="/timesheets">Timesheets</a>
+          <a href="/timesheets">📋 Timesheets</a>
         </li>
         <li>
-          <a href="/employees">Employees</a>
+          <a href="/employees">👥 Employees</a>
         </li>
       </ul>
     </div>

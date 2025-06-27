@@ -86,73 +86,75 @@ export default function TimesheetsPage() {
   );
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Timesheets</h1>
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Timesheets</h1>
 
       {/* Search Bar */}
-      <div>
+      <div className="mb-6">
         <input
           type="text"
           placeholder="Search by employee"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} // Update search query
-          style={{ padding: "8px", marginBottom: "1rem" }}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border border-gray-300 rounded-md px-4 py-2 w-full max-w-md"
         />
       </div>
 
-      <ul style={{ marginTop: "2rem" }}>
+      <ul className="flex gap-6 mb-6 text-blue-600 underline font-medium">
         <li>
-          <Link to="/timesheets/new">New Timesheet</Link>
+          <Link to="/timesheets/new">➕ New Timesheet</Link>
         </li>
         <li>
-          <Link to="/employees">Employees</Link>
+          <Link to="/employees">👥 Employees</Link>
         </li>
       </ul>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => setView("table")}>📋 Table View</button>
-        <button onClick={() => setView("calendar")}>📆 Calendar View</button>
+      <div className="flex gap-4 mb-6">
+        <button
+          className={`px-4 py-2 rounded ${view === "table" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          onClick={() => setView("table")}
+        >
+          📋 Table View
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${view === "calendar" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          onClick={() => setView("calendar")}
+        >
+          📆 Calendar View
+        </button>
       </div>
 
       {view === "table" ? (
-        <table
-          border={1}
-          cellPadding={10}
-          style={{ width: "100%", borderCollapse: "collapse" }}
-        >
-          <thead style={{ backgroundColor: "#f2f2f2" }}>
-            <tr>
-              <th>Timesheet #</th>
-              <th>Employee</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Summary</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTimesheets.map((ts: any) => (
-              <tr
-                key={ts.id}
-                onClick={() => navigate(`/timesheets/${ts.id}`)}
-                style={{ cursor: "pointer", backgroundColor: "#fff" }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f5f5f5")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#fff")
-                }
-              >
-                <td>{ts.id}</td>
-                <td>{ts.full_name}</td>
-                <td>{ts.start_time}</td>
-                <td>{ts.end_time}</td>
-                <td>{ts.summary}</td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200 rounded-md shadow text-sm">
+            <thead className="bg-gray-100 text-gray-700">
+              <tr>
+                <th className="p-3 text-left border-b">Timesheet #</th>
+                <th className="p-3 text-left border-b">Employee</th>
+                <th className="p-3 text-left border-b">Start</th>
+                <th className="p-3 text-left border-b">End</th>
+                <th className="p-3 text-left border-b">Summary</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredTimesheets.map((ts: any) => (
+                <tr
+                  key={ts.id}
+                  onClick={() => navigate(`/timesheets/${ts.id}`)}
+                  className="hover:bg-gray-50 cursor-pointer"
+                >
+                  <td className="p-3 border-b">{ts.id}</td>
+                  <td className="p-3 border-b">{ts.full_name}</td>
+                  <td className="p-3 border-b">{ts.start_time}</td>
+                  <td className="p-3 border-b">{ts.end_time}</td>
+                  <td className="p-3 border-b">{ts.summary}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <div className="sx-react-calendar-wrapper" style={{ height: "700px" }}>
+        <div className="sx-react-calendar-wrapper h-[700px]">
           <ScheduleXCalendar calendarApp={calendarApp} />
         </div>
       )}

@@ -15,7 +15,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadsDir = path.join(__dirname, "../../public/uploads");
 
-
 // fetches the employee by id from the database
 export async function loader({ params }: LoaderFunctionArgs) {
   const db = await getDB();
@@ -32,7 +31,6 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-
   const formData = await request.formData(); // collects submitted data and files
 
   const full_name = formData.get("full_name");
@@ -101,10 +99,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
     await fs.writeFile(path.join(__dirname, "../../public", cv_path), cvBuffer);
   }
 
-
   // saving to the database
   await db.run(
-
     // updates the employee fields
     // COALESCE: if the user doesn't re-upload a file, the old one stays unchanged
     `UPDATE employees SET
@@ -136,22 +132,16 @@ export default function EmployeePage() {
   const actionData = useActionData(); // captures validation errors
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Edit Employee #{employee.id}</h1>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Edit Employee #{employee.id}</h1>
 
       {/* show error messages */}
       {actionData?.errors?.length > 0 && (
-        <div
-          style={{
-            backgroundColor: "#ffe0e0",
-            border: "1px solid red",
-            padding: "1rem",
-            marginBottom: "1rem",
-            color: "darkred",
-          }}
-        >
-          <strong>Please fix the following:</strong>
-          <ul>
+        <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded mb-6">
+          <strong className="block font-medium mb-2">
+            Please fix the following:
+          </strong>
+          <ul className="list-disc list-inside space-y-1">
             {actionData.errors.map((err: string, i: number) => (
               <li key={i}>{err}</li>
             ))}
@@ -161,8 +151,10 @@ export default function EmployeePage() {
 
       <EmployeeForm defaultValues={employee} />
 
-      <hr />
-      <Link to="/employees">← Back to Employees</Link>
+      <hr className="my-8" />
+      <Link to="/employees" className="text-blue-600 hover:underline">
+        ← Back to Employees
+      </Link>
     </div>
   );
 }
